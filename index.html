@@ -35,6 +35,27 @@ h2 { text-align:center; }
   align-items:center;
 }
 
+.buttons {
+  display:flex;
+  gap:10px;
+}
+
+button {
+  flex:1;
+  background:#2563eb;
+  color:white;
+  border:none;
+  border-radius:8px;
+}
+
+button.secondary {
+  background:#6b7280;
+}
+
+button:active {
+  transform: scale(0.97);
+}
+
 img {
   width:100%;
   height:50vh;           /* ✅ polovina výšky obrazovky */
@@ -91,7 +112,10 @@ button {
 
   <input id="input" placeholder="Napiš název">
 
-  <button onclick="check()">OK</button>
+  <div class="buttons">
+  <button onclick="check()">✅ Odeslat</button>
+  <button class="secondary" onclick="dontKnow()">Nevím</button>
+  </div>
 
   <div id="info" class="info"></div>
 </div>
@@ -268,6 +292,18 @@ function check(){
    document.getElementById('info').innerText =
      "❌ Správně: " + current.name;
  }
+function dontKnow(){
+
+  // zobraz správnou odpověď
+  document.getElementById('info').innerText =
+    "👉 " + current.name;
+
+  // vrátí obrázek zpět do fronty (bude se opakovat)
+  queue.push(current);
+
+  // po 3 sekundách další obrázek
+  setTimeout(next, 3000);
+}
 
  // ✅ 2 sekundy čekání
  setTimeout(next, 2000);
