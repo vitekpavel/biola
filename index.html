@@ -20,10 +20,11 @@
 body {
   font-family: Arial;
   background:#f3f4f6;
-  max-width:480px;
+  max-width:600px;
   margin:auto;
   padding:10px;
 }
+
 h2 { text-align:center; }
 
 .card {
@@ -35,17 +36,43 @@ h2 { text-align:center; }
   align-items:center;
 }
 
+img {
+  width:100%;
+  height:50vh;
+  object-fit:contain;
+  margin-bottom:10px;
+  background:#f9fafb;
+  border-radius:10px;
+}
+
+@media (min-width: 800px) {
+  img {
+    height:60vh;
+  }
+}
+
+input {
+  width:100%;
+  padding:10px;
+  font-size:16px;
+  margin-top:6px;
+}
+
 .buttons {
   display:flex;
   gap:10px;
+  width:100%;
+  margin-top:6px;
 }
 
 button {
   flex:1;
-  background:#2563eb;
-  color:white;
+  padding:10px;
+  font-size:16px;
   border:none;
   border-radius:8px;
+  background:#2563eb;
+  color:white;
 }
 
 button.secondary {
@@ -56,73 +83,37 @@ button:active {
   transform: scale(0.97);
 }
 
-img {
-  width:100%;
-  height:50vh;           /* ✅ polovina výšky obrazovky */
-  object-fit:contain;    /* ✅ zachování poměru */
-  background:#f9fafb;
-  border-radius:10px;
-}
-
-/* 📱 mobil – ještě větší */
-@media (max-width: 600px) {
-  img {
-    height:55vh;
-  }
-}
-
-/* 💻 PC – větší a širší layout */
-@media (min-width: 800px) {
-  body {
-    max-width:700px;
-  }
-
-  img {
-    height:60vh;
-  }
-}
-
-
-input, button {
-  width:100%;
-  padding:10px;
-  margin-top:6px;
-  font-size:16px;
-}
-
-button {
-  background:#2563eb;
-  color:white;
-  border:none;
-}
-
 .info {
   margin-top:10px;
   text-align:center;
-  font-size:14px;
+  font-size:16px;
+  font-weight:bold;
 }
 </style>
 </head>
+
 <body>
 
 <h2>Procvičování obrázků</h2>
 
 <div class="card">
+
   <img id="img">
 
   <input id="input" placeholder="Napiš název">
 
   <div class="buttons">
-  <button onclick="check()">✅ Odeslat</button>
-  <button class="secondary" onclick="dontKnow()">Nevím</button>
+    <button onclick="check()">✅ Odeslat</button>
+    <button class="secondary" onclick="dontKnow()">Nevím</button>
   </div>
 
   <div id="info" class="info"></div>
+
 </div>
 
 <script>
 
-// ✅ ZDE JSOU DATA (soubor + správný název)
+// ✅ DATA (příklad – nahraď svými)
 const files = [
   { file: "belomech_sivy", name: "belomech sivy" },
   { file: "bez_cerny", name: "bez cerny" },
@@ -252,7 +243,7 @@ const files = [
 let queue = [...files];
 let current;
 
-// ✅ normalizace (ignoruje diakritiku + mezery)
+// ✅ odstranění diakritiky
 function norm(s){
  return s.toLowerCase()
    .normalize('NFD')
@@ -261,14 +252,16 @@ function norm(s){
    .trim();
 }
 
+// ✅ další obrázek
 function next(){
+
  if(queue.length === 0){
    document.getElementById('info').innerText = "🎉 Hotovo!";
    document.getElementById('img').src = "";
    return;
  }
 
- current = queue[Math.floor(Math.random()*queue.length)];
+ current = queue[Math.floor(Math.random() * queue.length)];
 
  document.getElementById('img').src =
    "./obrazky/" + current.file + ".jpg";
@@ -278,39 +271,46 @@ function next(){
    "Zbývá: " + queue.length;
 }
 
+// ✅ kontrola odpovědi
 function check(){
+
  let val = norm(document.getElementById('input').value);
  let correct = norm(current.name);
 
  if(val === correct){
+
    queue = queue.filter(x => x !== current);
 
    document.getElementById('info').innerText =
      "✅ Správně | Zbývá: " + queue.length;
-     
+
  } else {
+
    document.getElementById('info').innerText =
      "❌ Správně: " + current.name;
+
+   // vrátí se do fronty ještě jednou
+   queue.push(current);
  }
-function dontKnow(){
 
-  // zobraz správnou odpověď
-  document.getElementById('info').innerText =
-    "👉 " + current.name;
-
-  // vrátí obrázek zpět do fronty (bude se opakovat)
-  queue.push(current);
-
-  // po 3 sekundách další obrázek
-  setTimeout(next, 3000);
-}
-
- // ✅ 2 sekundy čekání
  setTimeout(next, 2000);
 }
 
+// ✅ NEVÍM (🔥 HLAVNÍ FUNKCE)
+function dontKnow(){
+
+ document.getElementById('info').innerText =
+   "👉 " + current.name;
+
+ // vrátí obrázek do fronty (aby se znovu objevil)
+ queue.push(current);
+
+ setTimeout(next, 3000);
+}
+
+// ✅ Enter = odeslat
 document.getElementById('input')
-.addEventListener('keypress', e=>{
+.addEventListener('keypress', function(e){
  if(e.key === "Enter") check();
 });
 
