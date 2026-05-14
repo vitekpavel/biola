@@ -241,7 +241,19 @@ function resetProgress(){
  }
 
 }
+// ✅ Enter = odeslat odpověď
 
+document.getElementById('input').addEventListener('keydown', function(e){
+
+  if(e.key === "Enter"){
+
+    e.preventDefault();
+
+    check();
+
+  }
+
+});
 // start
 loadSets();
 
