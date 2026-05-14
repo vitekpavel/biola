@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Procvičování rostlin</title>
+
+<style>
+body {
+  font-family: Arial;
+  background:#f3f4f6;
+  max-width:600px;
+  margin:auto;
+  padding:10px;
+}
+
+h2 { text-align:center; }
+
+select, input, button {
+  width:100%;
+  padding:10px;
+  margin-top:6px;
+  font-size:16px;
+}
+
+.card {
+  background:white;
+  padding:12px;
+  border-radius:12px;
+  margin-top:10px;
+  text-align:center;
+}
+
+img {
+  width:100%;
+  height:50vh;
+  object-fit:contain;
+  background:#f9fafb;
+  border-radius:10px;
+  margin-bottom:8px;
+}
+
+button {
+  border:none;
+  border-radius:8px;
+  background:#2563eb;
+  color:white;
+}
+
+.reset {
+  background:#dc2626;
+}
+
+.info {
+  font-weight:bold;
+  margin-top:10px;
+}
+</style>
+</head>
+
+<body>
+
+<h2>Procvičování obrázků</h2>
+
+<select id="setSelect"></select>
+
+<div class="card">
+
+  <img id="img">
+
+  <input id="input" placeholder="Napiš název">
+
+  <button onclick="check()">✅ Odeslat</button>
+  <button onclick="dontKnow()">Nevím</button>
+  <button class="reset" onclick="resetProgress()">🔄 Reset</button>
+
+  <div id="info" class="info"></div>
+
+</div>
+
+<script>
+
+let allSets = {};
+let queue = [];
+let current;
+let activeSet = null;
+
+// ✅ NORMALIZACE (tolerantní kontrola)
+function norm(s){
+ return s.toLowerCase()
+   .normalize('NFD')
+   .replace(/[\u0300-\u036f]/g,'')
+   .replace(/_/g,' ')
+   .replace(/\s+/g,' ')
+   .trim();
+}
+
+// ✅ načtení JSON
+async function loadSets(){
+
+  const res = await fetch("images.json");
+  const data = await res.json();
+
+  allSets = {};
+
+  data.forEach(path => {
+
+    let parts = path.split("/");
+
+    // ✅ název sady = složka (už hezky s diakritikou)
+    let setName = parts.length > 1 ? parts[0] : "ostatní";
+
+    if(!allSets[setName]) allSets[setName] = [];
+
+    allSets[setName].push({
+      file: "obrazky/" + path,
+      name: parts[parts.length-1].replace(/\.[^/.]+$/, "")
+    });
+
+  });
+
+  updateSelect();
+
+  loadSet(Object.keys(allSets)[0]);
+}
+
+// ✅ dropdown
+function updateSelect(){
+  const sel = document.getElementById("setSelect");
+  sel.innerHTML = "";
+
+  Object.keys(allSets).forEach(name => {
+
+    let opt = document.createElement("option");
+    opt.value = name;
+    opt.textContent = name;
+
+    sel.appendChild(opt);
+  });
+}
+
+document.getElementById("setSelect").onchange = function(){
+  loadSet(this.value);
+};
+
+// ✅ načti sadu
+function loadSet(name){
+
+  activeSet = name;
+
+  let saved = localStorage.getItem("progress_" + name);
+
+  if(saved){
+    queue = JSON.parse(saved);
+  } else {
+    queue = [...allSets[name]];
+  }
+
+  next();
+}
+
+function save(){
+  localStorage.setItem("progress_" + activeSet, JSON.stringify(queue));
+}
+
+// ✅ další obrázek
+function next(){
+
+ if(queue.length === 0){
+   info.innerText = "🎉 Hotovo!";
+   img.src = "";
+   return;
+ }
+
+ current = queue[Math.floor(Math.random() * queue.length)];
+
+ img.src = current.file;
+
+ input.value = "";
+ info.innerText = "Zbývá: " + queue.length;
+
+ input.focus();
+}
+
+// ✅ kontrola
+function check(){
+
+ let val = norm(input.value);
+ let correct = norm(current.name);
+
+ if(val === correct){
+
+   queue = queue.filter(x => x !== current);
+
+   save();
+
+   info.innerText = "✅ Správně | Zbývá: " + queue.length;
+
+ } else {
+
+   info.innerText = "❌ Správně: " + current.name;
+
+   moveTop(current);
+ }
+
+ setTimeout(next, 2000);
+}
+
+// ✅ opakování
+function moveTop(item){
+  queue = queue.filter(x => x !== item);
+  queue.unshift(item);
+}
+
+// ✅ nevím
+function dontKnow(){
+
+ info.innerText = "👉 " + current.name;
+
+ moveTop(current);
+
+ setTimeout(next, 3000);
+}
+
+// ✅ reset
+function resetProgress(){
+
+ if(confirm("Začít znovu?")){
+   localStorage.removeItem("progress_" + activeSet);
+   queue = [...allSets[activeSet]];
+   next();
+ }
+
+}
+
+// start
+loadSets();
+
+</script>
+
+</body>
+</html>
