@@ -32,14 +32,31 @@ select, input, button {
   font-size:16px;
 }
 
+/* ✅ layout */
+.layout {
+  display:flex;
+  gap:10px;
+  align-items:flex-start;
+}
+
+.help {
+  width:160px;
+  font-size:13px;
+  color:#555;
+  line-height:1.4;
+}
+
+/* ✅ karta */
 .card {
   background:white;
   padding:12px;
   border-radius:12px;
   margin-top:10px;
   text-align:center;
+  flex:1;
 }
 
+/* ✅ obrázek */
 img {
   width:100%;
   height:50vh;
@@ -64,37 +81,43 @@ button {
   font-weight:bold;
   margin-top:10px;
 }
+
+/* 📱 MOBIL – bez scrollu */
+@media (max-width:600px){
+
+  .layout {
+    flex-direction:column;
+  }
+
+  .help {
+    width:100%;
+    font-size:12px;
+  }
+
+  img {
+    height:40vh; /* menší obrázek = méně scrollu */
+  }
+}
 </style>
 </head>
 
 <body>
 
 <h2>Procvičování rostlin</h2>
-  
-<div style="font-size:13px; color:#555; margin-bottom:8px; text-align:left; line-height:1.4;">
-  Napiš název podle obrázku.<br>
-  ✅ Odeslat = kontrola <br>
-  ❓ Nevím = ukáže řešení <br>
-  🔄 Reset = začít znovu<br>
-  💾 Postup se ukládá do tohoto zařízení
-</div>
-
 
 <select id="setSelect"></select>
 
-<div style="display:flex; gap:10px; align-items:flex-start;">
+<div class="layout">
 
-  <!-- NÁPOVĚDA VLEVO -->
-  <div style="width:160px; font-size:13px; color:#555; line-height:1.4;">
+  <!-- ✅ NÁPOVĚDA -->
+  <div class="help">
     Napiš název podle obrázku.<br>
-    ✅ Odeslat = kontrola<br>
-    ❓ Nevím = ukáže řešení<br>
-    🔄 Reset = začít znovu<br>
+    ✅ Odeslat • ❓ Nevím • 🔄 Reset<br>
     💾 Ukládá se automaticky
   </div>
 
-  <!-- PŮVODNÍ KARTA -->
-  <div class="card" style="flex:1;">
+  <!-- ✅ HLAVNÍ OKNO -->
+  <div class="card">
 
     <img id="img">
 
@@ -110,26 +133,12 @@ button {
 
 </div>
 
-  <img id="img">
-
-  <input id="input" placeholder="Napiš název">
-
-  <button onclick="check()">✅ Odeslat</button>
-  <button onclick="dontKnow()">Nevím</button>
-  <button class="reset" onclick="resetProgress()">🔄 Reset</button>
-
-  <div id="info" class="info"></div>
-
-</div>
-
 <script>
-
 let allSets = {};
 let queue = [];
 let current;
 let activeSet = null;
 
-// ✅ NORMALIZACE (tolerantní kontrola)
 function norm(s){
  return s.toLowerCase()
    .normalize('NFD')
@@ -139,19 +148,14 @@ function norm(s){
    .trim();
 }
 
-// ✅ načtení JSON
 async function loadSets(){
-
   const res = await fetch("images.json");
   const data = await res.json();
 
   allSets = {};
 
   data.forEach(path => {
-
     let parts = path.split("/");
-
-    // ✅ název sady = složka (už hezky s diakritikou)
     let setName = parts.length > 1 ? parts[0] : "ostatní";
 
     if(!allSets[setName]) allSets[setName] = [];
@@ -160,25 +164,20 @@ async function loadSets(){
       file: "obrazky/" + path,
       name: parts[parts.length-1].replace(/\.[^/.]+$/, "")
     });
-
   });
 
   updateSelect();
-
   loadSet(Object.keys(allSets)[0]);
 }
 
-// ✅ dropdown
 function updateSelect(){
   const sel = document.getElementById("setSelect");
   sel.innerHTML = "";
 
   Object.keys(allSets).forEach(name => {
-
     let opt = document.createElement("option");
     opt.value = name;
     opt.textContent = name;
-
     sel.appendChild(opt);
   });
 }
@@ -187,9 +186,7 @@ document.getElementById("setSelect").onchange = function(){
   loadSet(this.value);
 };
 
-// ✅ načti sadu
 function loadSet(name){
-
   activeSet = name;
 
   let saved = localStorage.getItem("progress_" + name);
@@ -207,9 +204,7 @@ function save(){
   localStorage.setItem("progress_" + activeSet, JSON.stringify(queue));
 }
 
-// ✅ další obrázek
 function next(){
-
  if(queue.length === 0){
    info.innerText = "🎉 Hotovo!";
    img.src = "";
@@ -217,7 +212,6 @@ function next(){
  }
 
  current = queue[Math.floor(Math.random() * queue.length)];
-
  img.src = current.file;
 
  input.value = "";
@@ -226,72 +220,49 @@ function next(){
  input.focus();
 }
 
-// ✅ kontrola
 function check(){
-
  let val = norm(input.value);
  let correct = norm(current.name);
 
  if(val === correct){
-
    queue = queue.filter(x => x !== current);
-
    save();
-
    info.innerText = "✅ Správně | Zbývá: " + queue.length;
-
  } else {
-
    info.innerText = "❌ Správně: " + current.name;
-
    moveTop(current);
  }
 
  setTimeout(next, 2000);
 }
 
-// ✅ opakování
 function moveTop(item){
   queue = queue.filter(x => x !== item);
   queue.unshift(item);
 }
 
-// ✅ nevím
 function dontKnow(){
-
  info.innerText = "👉 " + current.name;
-
  moveTop(current);
-
  setTimeout(next, 3000);
 }
 
-// ✅ reset
 function resetProgress(){
-
  if(confirm("Začít znovu?")){
    localStorage.removeItem("progress_" + activeSet);
    queue = [...allSets[activeSet]];
    next();
  }
-
 }
-// ✅ Enter = odeslat odpověď
 
 document.getElementById('input').addEventListener('keydown', function(e){
-
   if(e.key === "Enter"){
-
     e.preventDefault();
-
     check();
-
   }
-
 });
-// start
-loadSets();
 
+loadSets();
 </script>
 
 </body>
