@@ -25,6 +25,16 @@ body {
 
 h2 { text-align:center; }
 
+/* ✅ NÁPOVĚDA */
+.help {
+  font-size:13px;
+  color:#555;
+  line-height:1.4;
+  margin-bottom:8px;
+  text-align:left;
+}
+
+/* FORM */
 select, input, button {
   width:100%;
   padding:10px;
@@ -32,34 +42,19 @@ select, input, button {
   font-size:16px;
 }
 
-/* ✅ layout */
-.layout {
-  display:flex;
-  gap:10px;
-  align-items:flex-start;
-}
-
-.help {
-  width:160px;
-  font-size:13px;
-  color:#555;
-  line-height:1.4;
-}
-
-/* ✅ karta */
+/* ✅ KARTA */
 .card {
   background:white;
   padding:12px;
   border-radius:12px;
   margin-top:10px;
   text-align:center;
-  flex:1;
 }
 
-/* ✅ obrázek */
+/* ✅ OBRÁZEK */
 img {
   width:100%;
-  height:50vh;
+  height:45vh;
   object-fit:contain;
   background:#f9fafb;
   border-radius:10px;
@@ -82,20 +77,10 @@ button {
   margin-top:10px;
 }
 
-/* 📱 MOBIL – bez scrollu */
+/* 📱 Mobil */
 @media (max-width:600px){
-
-  .layout {
-    flex-direction:column;
-  }
-
-  .help {
-    width:100%;
-    font-size:12px;
-  }
-
   img {
-    height:40vh; /* menší obrázek = méně scrollu */
+    height:40vh;
   }
 }
 </style>
@@ -105,31 +90,26 @@ button {
 
 <h2>Procvičování rostlin</h2>
 
+<!-- ✅ NÁVOD -->
+<div class="help">
+  Napiš název podle obrázku.<br>
+  ✅ Odeslat • ❓ Nevím • 🔄 Reset<br>
+  💾 Ukládá se automaticky
+</div>
+
 <select id="setSelect"></select>
 
-<div class="layout">
+<div class="card">
 
-  <!-- ✅ NÁPOVĚDA -->
-  <div class="help">
-    Napiš název podle obrázku.<br>
-    ✅ Odeslat • ❓ Nevím • 🔄 Reset<br>
-    💾 Ukládá se automaticky
-  </div>
+  <img id="img">
 
-  <!-- ✅ HLAVNÍ OKNO -->
-  <div class="card">
+  <input id="input" placeholder="Napiš název">
 
-    <img id="img">
+  <button onclick="check()">✅ Odeslat</button>
+  <button onclick="dontKnow()">Nevím</button>
+  <button class="reset" onclick="resetProgress()">🔄 Reset</button>
 
-    <input id="input" placeholder="Napiš název">
-
-    <button onclick="check()">✅ Odeslat</button>
-    <button onclick="dontKnow()">Nevím</button>
-    <button class="reset" onclick="resetProgress()">🔄 Reset</button>
-
-    <div id="info" class="info"></div>
-
-  </div>
+  <div id="info" class="info"></div>
 
 </div>
 
